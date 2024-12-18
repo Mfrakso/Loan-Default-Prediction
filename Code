@@ -1,0 +1,456 @@
+# Imports
+
+# Pandas and numpy for data manipulation
+import pandas as pd
+import numpy as np
+
+# No warnings about setting value on copy of slice
+pd.options.mode.chained_assignment = None
+
+# Display up to 60 columns of a dataframe
+pd.set_option('display.max_columns', 60)
+
+# Matplotlib visualization
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+# Set default font size
+plt.rcParams['font.size'] = 24
+
+# Internal ipython tool for setting figure size
+from IPython.core.pylabtools import figsize
+
+# Seaborn for visualization
+import seaborn as sns
+sns.set(font_scale = 2)
+
+# Splitting data into training and testing
+from sklearn.model_selection import train_test_split
+# # # Data Cleaning and Formatting
+
+# # Load in the Data and Examine
+
+# Read in data into a dataframe 
+data = pd.read_csv('../input/train_v2.csv')
+
+# Display top of dataframe
+data.head()
+/opt/conda/lib/python3.6/site-packages/IPython/core/interactiveshell.py:2785: DtypeWarning: Columns (135,204,274,417) have mixed types. Specify dtype option on import or set low_memory=False.
+  interactivity=interactivity, compiler=compiler, result=result)
+id	f1	f2	f3	f4	f5	f6	f7	f8	f9	f10	f13	f14	f15	f16	f17	f18	f19	f20	f21	f22	f23	f24	f25	f26	f27	f28	f29	f30	f31	...	f750	f751	f752	f753	f754	f755	f756	f757	f758	f759	f760	f761	f762	f763	f764	f765	f766	f767	f768	f769	f770	f771	f772	f773	f774	f775	f776	f777	f778	loss
+0	1	126	10	0.686842	1100	3	13699	7201.0	4949.0	126.75	126.03	7	0.7607	0.7542	612922	0.7236	0.7236	0.5171	0.7236	0.8476	0.7876	1.097851e+09	89	66	998046.0	89.0	89.0	89.00	89.00	89.0	...	2.3451	0.030594	1.7418	1.5271	0.8474	0.4715	0.028362	3.1611	2.5162	2.0037	0.019636	4.4352	4.2676	-0.1524	1	-0.40	-0.560	-0.440	-0.6280	-3.14	5	2.14	-1.54	1.18	0.1833	0.7873	1	0	5	0
+1	2	121	10	0.782776	1100	3	84645	240.0	1625.0	123.52	121.35	7	0.6555	0.6555	245815	0.6341	0.6341	0.3909	0.6667	0.6903	0.6903	8.449459e+08	78	50	754416.0	78.0	78.0	78.00	78.00	78.0	...	1.5666	0.120442	1.1963	1.0322	0.4843	0.2389	0.130160	2.7659	1.9523	1.4059	0.115277	3.2763	2.7962	-0.3097	1	-0.17	-0.275	-0.203	-0.2300	-1.38	6	0.54	-0.24	0.13	0.1926	-0.6787	1	0	5	0
+2	3	126	10	0.500080	1100	3	83607	1800.0	1527.0	127.76	126.49	7	0.7542	0.7542	1385872	0.7542	0.7542	0.5508	0.7542	0.8091	0.7807	1.308478e+09	89	54	1037651.0	89.0	89.0	100.43	94.37	89.0	...	4.5627	0.226336	3.3277	3.4166	1.8321	0.9979	0.103307	6.8623	5.2963	4.1282	0.219729	8.1381	7.3269	-0.1909	1	-0.58	-0.540	-0.572	-0.3985	-5.18	13	2.89	-1.73	1.04	0.2521	0.7258	1	0	5	0
+3	4	134	10	0.439874	1100	3	82642	7542.0	1730.0	132.94	133.58	7	0.8017	0.7881	704687	0.7881	0.7881	0.5923	0.7881	0.8230	0.8158	1.472752e+09	93	55	1115721.0	93.0	93.0	114.63	102.92	93.0	...	1.6899	0.054630	1.3748	1.3421	0.7982	0.4810	0.081205	2.5571	2.0593	1.6653	0.056470	3.2516	3.0631	-0.1770	1	-0.75	-0.635	-0.745	-0.5100	-2.04	4	1.29	-0.89	0.66	0.2498	0.7119	1	0	5	0
+4	5	109	9	0.502749	2900	4	79124	89.0	491.0	122.72	112.77	6	0.5263	0.5263	51985	0.5263	0.5263	0.3044	0.5405	0.5556	0.5455	1.442916e+09	60	21	536400.0	60.0	60.0	60.00	60.00	60.0	...	11.9179	0.085330	7.2175	6.2262	3.1446	1.6149	0.074286	15.9080	12.5688	9.9844	0.067540	17.5561	15.6079	-0.4444	1	-0.18	-0.280	-0.182	-0.4277	-11.12	26	6.11	-3.82	2.51	0.2282	-0.5399	0	0	5	0
+5 rows × 771 columns
+
+data.shape
+(105471, 771)
+# # Data Types and Missing Values
+
+# See the column data types and non-missing values
+data.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 105471 entries, 0 to 105470
+Columns: 771 entries, id to loss
+dtypes: float64(653), int64(99), object(19)
+memory usage: 620.4+ MB
+data.select_dtypes(include=['object']).head()
+f137	f138	f206	f207	f276	f277	f338	f390	f391	f419	f420	f469	f472	f534	f537	f626	f627	f695	f698
+0	8090000000000000	754485076006959972352	3200000000000	38600000000000000	7900000000000000	683091368180479950848	7610000000000	10370164393071999997033054208	13621142007705000132589703585884798976	137000000000	511000000000000	569877634360569973702656	3427303293502300223465356001280	240811094251680005357568	1185103615651699994464937312256	11724173453590999285553430528	16027029142402000396838501389877379072	8700000000000000000	8010000000000000000
+1	2250000000000	15300000000000000	392000000000	1690000000000000	92300000000000	2140000000000000000	796594176	5098137566366599989877014528	5366154527659000357778647583412977664	9483264	1593188352	107000000000000000	9894337169928600158208	251470350285930004480	161196782629860003268263936	6391495663130699779035627520	7158933769610900052770065343332745216	5890000000000000000	5030000000000000000
+2	186000000000000	6910365323840000000	23700000000000	389000000000000000	10300000000000	69200000000000000	461000000000	26400269714792999161039945728	36117033568522998807722429270944907264	36051866452	63500000000000	313319151143610023936	222812827058929985669562368	116067852739909992448	61668865475731997253959680	36420952401170000260810932224	56027915541865997900093655676589441024	24512111987574001664	19855991371293999104
+3	44500000000000000	11225194901267999096832	16098514954	35000000000000	22200000000000	295000000000000000	1330000000000	9333818143939599917454983168	12638526060843999893906772076814925824	5621900678	9380000000000	2641626213765599994052608	24452856014536001129152839155712	202899352692079984640	126293716597939998795235328	15267506423634001098621059072	24362045267421999852972382580757233664	9660000000000000000	6960000000000000000
+4	52152926246	108000000000000	442000000000	1870000000000000	3630000000000	23100000000000000	2240000000000	196004669899870011305513451520	428213273484070002013091334592080642048	279000000000	659000000000000	68300000000000	922000000000000000	654000000000000000	89341826582645997305856	238204359524660008028924280832	550170020491249969340152709153269219328	108505460071560003584	94766610066210996224
+# Statistics for each column
+data.describe()
+id	f1	f2	f3	f4	f5	f6	f7	f8	f9	f10	f13	f14	f15	f16	f17	f18	f19	f20	f21	f22	f23	f24	f25	f26	f27	f28	f29	f30	f31	...	f750	f751	f752	f753	f754	f755	f756	f757	f758	f759	f760	f761	f762	f763	f764	f765	f766	f767	f768	f769	f770	f771	f772	f773	f774	f775	f776	f777	f778	loss
+count	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	105289.000000	105370.000000	105471.000000	105471.000000	105471.000000	105371.000000	105423.000000	1.054710e+05	105312.000000	105448.000000	105448.000000	105011.000000	103631.000000	103773.000000	1.047730e+05	105471.000000	105471.000000	1.047730e+05	105471.000000	105471.000000	105471.000000	105471.000000	104773.000000	...	104618.000000	104013.000000	105469.000000	105469.000000	105469.000000	105469.000000	105238.000000	104671.000000	104671.000000	104671.000000	104137.000000	105313.000000	105313.000000	103631.000000	105471.0	105470.000000	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	105471.000000	104407.000000	103946.000000	105471.000000	105471.000000	105471.000000	105471.000000
+mean	52736.000000	134.603171	8.246883	0.499066	2678.488874	7.354533	47993.704317	2974.336018	2436.363718	134.555225	134.596862	11.349015	0.696120	0.678140	4.010386e+06	0.673572	0.649476	0.510736	0.685829	0.746194	0.726551	3.014404e+09	82.179803	63.420561	1.108926e+06	92.134281	86.490683	103.850939	91.672933	90.045642	...	8.115740	0.138719	6.130018	5.500419	3.390325	2.158617	0.119762	10.602136	8.782883	7.341984	0.136195	12.921228	12.103488	-0.253806	1.0	-0.471021	-0.476605	-0.471572	-0.491973	-8.786110	17.422543	5.800976	-4.246788	3.273059	0.233852	0.014797	0.310246	0.322847	175.951589	0.799585
+std	30446.999458	14.725467	1.691535	0.288752	1401.010943	5.151112	35677.136048	2546.551085	2262.950221	13.824682	14.504043	3.669019	0.242829	0.241969	6.623236e+06	0.232733	0.246958	0.173126	0.241082	0.237795	0.233876	2.070153e+09	28.316093	32.431329	3.015962e+05	36.904526	30.830152	40.968777	32.681102	12.535453	...	10.319706	0.115468	8.121672	7.143152	4.685670	3.163447	0.063974	12.899936	10.998444	9.435965	0.112682	14.973088	14.151640	0.237795	0.0	0.284702	0.194983	0.263993	0.141869	9.684043	18.548936	6.508555	4.828265	3.766746	0.073578	1.039439	0.462597	0.467567	298.294043	4.321120
+min	1.000000	103.000000	1.000000	0.000006	1100.000000	1.000000	0.000000	1.000000	1.000000	106.820000	103.140000	2.000000	0.000000	0.000000	0.000000e+00	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	1.623600e+05	0.000000	0.000000	1.230000e+02	0.000000	0.000000	0.000000	0.000000	1.000000	...	0.000000	0.000000	0.000000	0.000100	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	-1.000000	1.0	-0.970000	-0.950000	-0.963000	-0.945000	-85.450000	2.000000	0.000000	-43.160000	0.000000	0.000000	-18.439600	0.000000	0.000000	2.000000	0.000000
+25%	26368.500000	124.000000	8.000000	0.248950	1500.000000	4.000000	11255.000000	629.000000	746.000000	124.290000	123.870000	9.000000	0.680000	0.661500	4.117930e+05	0.656000	0.635600	0.432500	0.669400	0.729700	0.710500	1.508475e+09	81.000000	45.000000	9.267570e+05	84.000000	83.000000	91.000000	87.000000	84.000000	...	1.700900	0.058420	1.202000	1.122200	0.595700	0.323300	0.076388	2.535400	1.957400	1.530850	0.056469	3.361800	3.055100	-0.270300	1.0	-0.710000	-0.630000	-0.699000	-0.575900	-11.530000	5.000000	1.480000	-5.700000	0.740000	0.198400	-0.704275	0.000000	0.000000	19.000000	0.000000
+50%	52736.000000	129.000000	9.000000	0.498267	2200.000000	4.000000	76530.000000	2292.000000	1786.000000	128.460000	129.080000	11.000000	0.770500	0.754200	1.672764e+06	0.745800	0.736000	0.539200	0.761900	0.818200	0.798200	2.233947e+09	91.000000	65.000000	1.115136e+06	94.780000	94.000000	108.000000	99.000000	92.000000	...	4.261950	0.083637	3.081600	2.840700	1.627000	0.957600	0.103507	5.855800	4.711500	3.830000	0.082008	7.564900	7.045500	-0.181800	1.0	-0.500000	-0.480000	-0.480000	-0.503100	-5.440000	11.000000	3.570000	-2.600000	1.990000	0.251800	0.375400	0.000000	0.000000	40.000000	0.000000
+75%	79103.500000	148.000000	9.000000	0.749494	3700.000000	10.000000	80135.000000	4679.000000	3411.000000	149.080000	148.310000	13.000000	0.831900	0.815100	4.731222e+06	0.804900	0.796700	0.627000	0.823000	0.876100	0.855900	4.031443e+09	98.000000	84.000000	1.293732e+06	104.000000	101.000000	128.750000	109.890000	99.000000	...	10.210900	0.217172	7.569000	6.859100	4.152300	2.595800	0.156381	13.316650	10.987400	9.148000	0.219453	16.463500	15.448100	-0.123900	1.0	-0.230000	-0.330000	-0.248000	-0.420000	-2.390000	23.000000	7.700000	-1.010000	4.440000	0.283600	0.737100	1.000000	1.000000	104.000000	0.000000
+max	105471.000000	176.000000	11.000000	0.999994	7900.000000	17.000000	88565.000000	9968.000000	11541.000000	172.950000	175.270000	40.000000	1.000000	1.000000	7.037873e+07	1.000000	1.000000	1.000000	1.000000	1.000000	1.000000	1.563049e+10	126.000000	184.000000	2.603664e+06	218.730000	160.490000	220.630000	159.900000	126.000000	...	91.821900	0.500000	77.673100	68.652100	48.579400	36.473500	0.497640	112.770300	95.343600	82.293100	0.500000	127.346800	120.425000	0.000000	1.0	0.000000	0.000000	0.000000	0.000000	0.000000	168.000000	58.120000	0.000000	34.040000	0.473700	11.092000	1.000000	1.000000	1212.000000	100.000000
+8 rows × 752 columns
+
+# # Missing Values
+
+# Function to calculate missing values by column
+def missing_values_table(df):
+        # Total missing values
+        mis_val = df.isnull().sum()
+        
+        # Percentage of missing values
+        mis_val_percent = 100 * df.isnull().sum() / len(df)
+        
+        # Make a table with the results
+        mis_val_table = pd.concat([mis_val, mis_val_percent], axis=1)
+        
+        # Rename the columns
+        mis_val_table_ren_columns = mis_val_table.rename(
+        columns = {0 : 'Missing Values', 1 : '% of Total Values'})
+        
+        # Sort the table by percentage of missing descending
+        mis_val_table_ren_columns = mis_val_table_ren_columns[
+            mis_val_table_ren_columns.iloc[:,1] != 0].sort_values(
+        '% of Total Values', ascending=False).round(1)
+        
+        # Print some summary information
+        print ("Your selected dataframe has " + str(df.shape[1]) + " columns.\n"      
+            "There are " + str(mis_val_table_ren_columns.shape[0]) +
+              " columns that have missing values.")
+        
+        # Return the dataframe with missing information
+        return mis_val_table_ren_columns
+missing_values_table(data).head(50)
+Your selected dataframe has 771 columns.
+There are 525 columns that have missing values.
+Missing Values	% of Total Values
+f662	18833	17.9
+f663	18833	17.9
+f159	18736	17.8
+f160	18736	17.8
+f170	18417	17.5
+f169	18417	17.5
+f618	18407	17.5
+f619	18407	17.5
+f331	18067	17.1
+f330	18067	17.1
+f179	17162	16.3
+f180	17162	16.3
+f422	14235	13.5
+f653	13205	12.5
+f190	12234	11.6
+f189	12234	11.6
+f340	11911	11.3
+f341	11911	11.3
+f726	11282	10.7
+f665	11282	10.7
+f669	11282	10.7
+f668	11282	10.7
+f664	11282	10.7
+f667	11282	10.7
+f666	11282	10.7
+f640	9700	9.2
+f199	9068	8.6
+f200	9068	8.6
+f650	9003	8.5
+f651	9003	8.5
+f72	9002	8.5
+f586	8965	8.5
+f587	8965	8.5
+f649	8716	8.3
+f648	8657	8.2
+f588	8432	8.0
+f621	8180	7.8
+f620	8180	7.8
+f673	7343	7.0
+f672	7343	7.0
+f210	6861	6.5
+f209	6861	6.5
+f679	6393	6.1
+f149	2859	2.7
+f150	2859	2.7
+f32	2572	2.4
+f152	2561	2.4
+f151	2561	2.4
+f171	2561	2.4
+f181	2561	2.4
+data.fillna(data.mean(), inplace=True)
+missing_values_table(data).head(50)
+Your selected dataframe has 771 columns.
+There are 12 columns that have missing values.
+Missing Values	% of Total Values
+f206	1291	1.2
+f207	1291	1.2
+f390	698	0.7
+f391	698	0.7
+f626	698	0.7
+f627	698	0.7
+f695	698	0.7
+f698	698	0.7
+f138	182	0.2
+f137	177	0.2
+f276	101	0.1
+f277	101	0.1
+data.dropna(inplace=True)
+missing_values_table(data)
+Your selected dataframe has 771 columns.
+There are 0 columns that have missing values.
+Missing Values	% of Total Values
+data.shape
+(103302, 771)
+# # # Exploratory Data Analysis
+
+for i in data.select_dtypes(include=['object']).columns:
+    data.drop(labels=i, axis=1, inplace=True)
+# # Single Variable Plots
+
+figsize=(8, 8)
+
+# Histogram of the loss
+plt.style.use('fivethirtyeight')
+plt.hist(data['loss'], bins = 100, edgecolor = 'k')
+plt.xlabel('Loss') 
+plt.ylabel('Number of Clients');
+plt.title('Loss Distribution')
+Text(0.5,1,'Loss Distribution')
+
+# # Correlations between Features and Target
+
+# Find all correlations and sort 
+correlations_data = data.corr()['loss'].sort_values()
+
+# Print the most negative correlations
+print(correlations_data.head(15), '\n')
+
+# Print the most positive correlations
+print(correlations_data.tail(15))
+f612   -0.016943
+f776   -0.015111
+f315   -0.011106
+f70    -0.010740
+f314   -0.010689
+f323   -0.010676
+f69    -0.010269
+f322   -0.009299
+f734   -0.009284
+f738   -0.008635
+f1     -0.008162
+f631   -0.008097
+f428   -0.007973
+f666   -0.007868
+f299   -0.007778
+Name: loss, dtype: float64 
+
+f674    0.018999
+f536    0.026087
+f471    0.039538
+loss    1.000000
+f33          NaN
+f34          NaN
+f35          NaN
+f37          NaN
+f38          NaN
+f678         NaN
+f700         NaN
+f701         NaN
+f702         NaN
+f736         NaN
+f764         NaN
+Name: loss, dtype: float64
+for i in data.columns:
+    if len(set(data[i]))==1:
+        data.drop(labels=[i], axis=1, inplace=True)
+# Find all correlations and sort 
+correlations_data = data.corr()['loss'].sort_values()
+
+# Print the most negative correlations
+print(correlations_data.head(15), '\n')
+
+# Print the most positive correlations
+print(correlations_data.tail(15))
+f612   -0.016943
+f776   -0.015111
+f315   -0.011106
+f70    -0.010740
+f314   -0.010689
+f323   -0.010676
+f69    -0.010269
+f322   -0.009299
+f734   -0.009284
+f738   -0.008635
+f1     -0.008162
+f631   -0.008097
+f428   -0.007973
+f666   -0.007868
+f299   -0.007778
+Name: loss, dtype: float64 
+
+f282    0.010726
+f251    0.010915
+f221    0.010968
+f556    0.011575
+f675    0.011606
+f13     0.011933
+f68     0.013375
+f599    0.014165
+f597    0.014165
+f670    0.014811
+f67     0.015012
+f674    0.018999
+f536    0.026087
+f471    0.039538
+loss    1.000000
+Name: loss, dtype: float64
+data.shape
+(103302, 741)
+# # # Feature Engineering and Selection
+
+def remove_collinear_features(x, threshold):
+    '''
+    Objective:
+        Remove collinear features in a dataframe with a correlation coefficient
+        greater than the threshold. Removing collinear features can help a model
+        to generalize and improves the interpretability of the model.
+        
+    Inputs: 
+        threshold: any features with correlations greater than this value are removed
+    
+    Output: 
+        dataframe that contains only the non-highly-collinear features
+    '''
+    
+    # Dont want to remove correlations between loss
+    y = x['loss']
+    x = x.drop(columns = ['loss'])
+    
+    # Calculate the correlation matrix
+    corr_matrix = x.corr()
+    iters = range(len(corr_matrix.columns) - 1)
+    drop_cols = []
+
+    # Iterate through the correlation matrix and compare correlations
+    for i in iters:
+        for j in range(i):
+            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
+            col = item.columns
+            row = item.index
+            val = abs(item.values)
+            
+            # If correlation exceeds the threshold
+            if val >= threshold:
+                # Print the correlated features and the correlation value
+                # print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+                drop_cols.append(col.values[0])
+
+    # Drop one of each pair of correlated columns
+    drops = set(drop_cols)
+    x = x.drop(columns = drops)
+    
+    # Add the score back in to the data
+    x['loss'] = y
+               
+    return x
+# Remove the collinear features above a specified correlation coefficient
+data = remove_collinear_features(data, 0.6);
+data.shape
+(103302, 156)
+# # # Split Into Training and Testing Sets
+
+# Separate out the features and targets
+features = data.drop(columns='loss')
+targets = pd.DataFrame(data['loss'])
+
+# Split into 80% training and 20% testing set
+X_train, X_test, y_train, y_test = train_test_split(features, targets, test_size = 0.2, random_state = 42)
+
+print(X_train.shape)
+print(X_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+(82641, 155)
+(20661, 155)
+(82641, 1)
+(20661, 1)
+# # Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+/opt/conda/lib/python3.6/site-packages/sklearn/preprocessing/data.py:625: DataConversionWarning: Data with input dtype int64, float64 were all converted to float64 by StandardScaler.
+  return self.partial_fit(X, y)
+/opt/conda/lib/python3.6/site-packages/sklearn/base.py:462: DataConversionWarning: Data with input dtype int64, float64 were all converted to float64 by StandardScaler.
+  return self.fit(X, **fit_params).transform(X)
+/opt/conda/lib/python3.6/site-packages/ipykernel_launcher.py:5: DataConversionWarning: Data with input dtype int64, float64 were all converted to float64 by StandardScaler.
+  """
+# Convert y to one-dimensional array (vector)
+y_train = np.array(y_train).reshape((-1, ))
+y_test = np.array(y_test).reshape((-1, ))
+X_train
+array([[-1.06877109, -0.16688215,  1.03564494, ..., -0.61327879,
+         0.65159233, -0.66443318],
+       [-0.48425848,  2.15138579, -0.14682708, ..., -0.86473327,
+         0.74503266, -0.66443318],
+       [-0.43576466,  1.60591098, -0.73806309, ...,  1.07833542,
+         1.24726226,  1.50504223],
+       ...,
+       [ 0.84197055, -0.57598826,  1.03564494, ...,  0.82039823,
+        -0.75457294,  1.50504223],
+       [-1.69955094, -0.64417261,  0.44440893, ..., -1.37936099,
+        -0.4115703 , -0.66443318],
+       [-1.20154789,  1.06043617, -0.14682708, ..., -0.67299456,
+         0.87515049, -0.66443318]])
+X_test
+array([[-0.47027681, -1.18964742,  1.03564494, ...,  0.83261565,
+         4.19883151,  1.50504223],
+       [ 0.34727464,  1.67409533, -0.73806309, ..., -1.49355648,
+         0.76570014, -0.66443318],
+       [ 1.02805453, -0.3714352 , -2.51177113, ..., -0.96808269,
+         1.03078733,  1.50504223],
+       ...,
+       [ 0.29720911,  0.92406747, -0.73806309, ..., -1.16904681,
+        -0.70741614, -0.66443318],
+       [ 0.85975052, -0.91691001,  1.03564494, ..., -0.85600654,
+        -0.90497014,  1.50504223],
+       [ 0.00752321, -1.18964742, -1.3292991 , ..., -1.04126255,
+         0.69224809, -0.66443318]])
+# # # Models to Evaluate
+
+# We will compare five different machine learning Cassification models:
+
+# 1 - Logistic Regression
+# 2 - K-Nearest Neighbors Classification
+# 3 - Suport Vector Machine
+# 4 - Naive Bayes
+# 5 - Random Forest Classification
+
+# Function to calculate mean absolute error
+def cross_val(X_train, y_train, model):
+    # Applying k-Fold Cross Validation
+    from sklearn.model_selection import cross_val_score
+    accuracies = cross_val_score(estimator = model, X = X_train, y = y_train, cv = 5)
+    return accuracies.mean()
+
+# Takes in a model, trains the model, and evaluates the model on the test set
+def fit_and_evaluate(model):
+    
+    # Train the model
+    model.fit(X_train, y_train)
+    
+    # Make predictions and evalute
+    model_pred = model.predict(X_test)
+    model_cross = cross_val(X_train, y_train, model)
+    
+    # Return the performance metric
+    return model_cross
+# # Naive Bayes
+from sklearn.naive_bayes import GaussianNB
+naive = GaussianNB()
+naive_cross = fit_and_evaluate(naive)
+
+print('Naive Bayes Performance on the test set: Cross Validation Score = %0.4f' % naive_cross)
+/opt/conda/lib/python3.6/site-packages/sklearn/model_selection/_split.py:652: Warning: The least populated class in y has only 1 members, which is too few. The minimum number of members in any class cannot be less than n_splits=5.
+  % (min_groups, self.n_splits)), Warning)
+Naive Bayes Performance on the test set: Cross Validation Score = 0.0099
+# # Random Forest Classification
+from sklearn.ensemble import RandomForestClassifier
+random = RandomForestClassifier(n_estimators = 10, criterion = 'entropy')
+random_cross = fit_and_evaluate(random)
+
+print('Random Forest Performance on the test set: Cross Validation Score = %0.4f' % random_cross)
+/opt/conda/lib/python3.6/site-packages/sklearn/model_selection/_split.py:652: Warning: The least populated class in y has only 1 members, which is too few. The minimum number of members in any class cannot be less than n_splits=5.
+  % (min_groups, self.n_splits)), Warning)
+Random Forest Performance on the test set: Cross Validation Score = 0.9067
+# # Gradiente Boosting Classification
+from xgboost import XGBClassifier
+gb = XGBClassifier()
+gb_cross = fit_and_evaluate(gb)
+
+print('Gradiente Boosting Classification Performance on the test set: Cross Validation Score = %0.4f' % gb_cross)
+/opt/conda/lib/python3.6/site-packages/sklearn/model_selection/_split.py:652: Warning: The least populated class in y has only 1 members, which is too few. The minimum number of members in any class cannot be less than n_splits=5.
+  % (min_groups, self.n_splits)), Warning)
+Gradiente Boosting Classification Performance on the test set: Cross Validation Score = 0.9067
